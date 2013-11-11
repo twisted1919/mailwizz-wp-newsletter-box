@@ -9,6 +9,7 @@ Author URI: http://www.mailwizz.com
 License: MIT http://opensource.org/licenses/MIT
 */
 
+// register the sdk autoloader.
 if (!class_exists('MailWizzApi_Autoloader', false)) {
     require_once dirname(__FILE__) . '/mailwizz-php-sdk/MailWizzApi/Autoloader.php';
     MailWizzApi_Autoloader::register();
