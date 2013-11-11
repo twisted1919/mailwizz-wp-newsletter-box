@@ -499,7 +499,7 @@ function mwznb_build_sdk_config($apiUrl, $publicKey, $privateKey) {
 
 // restore the original config
 function mwznb_restore_sdk_config($oldConfig) {
-    if (!empty($oldConfig)) {
+    if (!empty($oldConfig) && $oldConfig instanceof MailWizzApi_Config) {
         MailWizzApi_Base::setConfig($oldConfig);
     }
 }
