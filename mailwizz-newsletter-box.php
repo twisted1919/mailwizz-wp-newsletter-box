@@ -9,6 +9,11 @@ Author URI: http://www.mailwizz.com
 License: MIT http://opensource.org/licenses/MIT
 */
 
+if (!class_exists('MailWizzApi_Autoloader', false)) {
+    require_once dirname(__FILE__) . '/mailwizz-php-sdk/MailWizzApi/Autoloader.php';
+    MailWizzApi_Autoloader::register();
+}
+   
 /**
  * MailWizzNewsletterBox
  * 
@@ -37,7 +42,8 @@ class MailWizzNewsletterBox extends WP_Widget
      * @param array $args     Widget arguments.
      * @param array $instance Saved values from database.
      */
-    public function widget($args, $instance) {
+    public function widget($args, $instance) 
+    {
         $title = apply_filters('widget_title', $instance['title']);
 
         echo $args['before_widget'];
@@ -60,8 +66,8 @@ class MailWizzNewsletterBox extends WP_Widget
      *
      * @param array $instance Previously saved values from database.
      */
-    public function form($instance) {
-
+    public function form($instance) 
+    {
         $title              = isset($instance['title'])                 ? $instance['title']                : null;
         $apiUrl             = isset($instance['api_url'])               ? $instance['api_url']              : null;
         $publicKey          = isset($instance['public_key'])            ? $instance['public_key']           : null;
@@ -76,12 +82,14 @@ class MailWizzNewsletterBox extends WP_Widget
         $freshFields = array();
         
         if (!empty($apiUrl) && !empty($publicKey) && !empty($privateKey)) {
-            mwznb_register_sdk($apiUrl, $publicKey, $privateKey);
+            
+            $oldSdkConfig = MailWizzApi_Base::getConfig();
+            MailWizzApi_Base::setConfig(mwznb_build_sdk_config($apiUrl, $publicKey, $privateKey));
 
             $endpoint = new MailWizzApi_Endpoint_Lists();
             $response = $endpoint->getLists(1, 50);
             $response = $response->body->toArray();
-            
+
             if (isset($response['status']) && $response['status'] == 'success' && !empty($response['data']['records'])) {
                 foreach ($response['data']['records'] as $list) {
                     $freshLists[] = array(
@@ -102,6 +110,9 @@ class MailWizzNewsletterBox extends WP_Widget
                     }
                 }
             }
+            
+            mwznb_restore_sdk_config($oldSdkConfig);
+            unset($oldSdkConfig);
         }
 
         ?>
@@ -176,7 +187,8 @@ class MailWizzNewsletterBox extends WP_Widget
      *
      * @return array Updated safe values to be saved.
      */
-    public function update($new_instance, $old_instance) {
+    public function update($new_instance, $old_instance) 
+    {
         $instance = array();
         
         $instance['title']          = !empty($new_instance['title'])        ? sanitize_text_field($new_instance['title'])       : '';
@@ -214,11 +226,15 @@ class MailWizzNewsletterBox extends WP_Widget
             return;
         }
         
-        mwznb_register_sdk($instance['api_url'], $instance['public_key'], $instance['private_key']);
-        
+        $oldSdkConfig = MailWizzApi_Base::getConfig();
+        MailWizzApi_Base::setConfig(mwznb_build_sdk_config($instance['api_url'], $instance['public_key'], $instance['private_key']));
+
         $endpoint = new MailWizzApi_Endpoint_ListFields();
         $response = $endpoint->getFields($instance['list_uid']);
         $response = $response->body->toArray();
+        
+        mwznb_restore_sdk_config($oldSdkConfig);
+        unset($oldSdkConfig);
         
         if (!isset($response['status']) || $response['status'] != 'success' || empty($response['data']['records'])) {
             return;
@@ -259,7 +275,6 @@ add_action('widgets_init', create_function('', 'return register_widget("MailWizz
 // register admin assets
 add_action('admin_enqueue_scripts', 'mwznb_load_admin_assets');
 function mwznb_load_admin_assets() {
-    
     wp_register_script('mwznb-admin', plugins_url('/js/admin.js', __FILE__), array('jquery'), '1.0', true);
     wp_enqueue_script('mwznb-admin');
 }
@@ -267,7 +282,6 @@ function mwznb_load_admin_assets() {
 // register frontend assets
 add_action('wp_enqueue_scripts', 'mwznb_load_frontend_assets');
 function mwznb_load_frontend_assets() {
-    
     wp_register_style('mwznb-front', plugins_url('/css/front.css', __FILE__), array(), '1.0');
     wp_register_script('mwznb-front', plugins_url('/js/front.js', __FILE__), array('jquery'), '1.0', true);
     
@@ -276,11 +290,9 @@ function mwznb_load_frontend_assets() {
 }
 
 // register ajax actions
-
 // fetch the lists available for given api data
 add_action('wp_ajax_mwznb_fetch_lists', 'mwznb_fetch_lists_callback');
 function mwznb_fetch_lists_callback() {
-
     $apiUrl     = isset($_POST['api_url'])      ? sanitize_text_field($_POST['api_url'])        : null;
     $publicKey  = isset($_POST['public_key'])   ? sanitize_text_field($_POST['public_key'])     : null;
     $privateKey = isset($_POST['private_key'])  ? sanitize_text_field($_POST['private_key'])    : null;
@@ -302,11 +314,15 @@ function mwznb_fetch_lists_callback() {
         )));
     }
     
-    mwznb_register_sdk($apiUrl, $publicKey, $privateKey);
+    $oldSdkConfig = MailWizzApi_Base::getConfig();
+    MailWizzApi_Base::setConfig(mwznb_build_sdk_config($apiUrl, $publicKey, $privateKey));
 
     $endpoint = new MailWizzApi_Endpoint_Lists();
     $response = $endpoint->getLists(1, 50);
     $response = $response->body->toArray();
+    
+    mwznb_restore_sdk_config($oldSdkConfig);
+    unset($oldSdkConfig);
     
     if (!isset($response['status']) || $response['status'] != 'success') {
         exit(json_encode(array(
@@ -349,7 +365,6 @@ function mwznb_fetch_lists_callback() {
 // fetch list fields
 add_action('wp_ajax_mwznb_fetch_list_fields', 'mwznb_fetch_list_fields_callback');
 function mwznb_fetch_list_fields_callback() {
-
     $apiUrl     = isset($_POST['api_url'])      ? sanitize_text_field($_POST['api_url'])        : null;
     $publicKey  = isset($_POST['public_key'])   ? sanitize_text_field($_POST['public_key'])     : null;
     $privateKey = isset($_POST['private_key'])  ? sanitize_text_field($_POST['private_key'])    : null;
@@ -364,12 +379,16 @@ function mwznb_fetch_list_fields_callback() {
     ) {
         die();
     }
-  
-    mwznb_register_sdk($apiUrl, $publicKey, $privateKey);
+    
+    $oldSdkConfig = MailWizzApi_Base::getConfig();
+    MailWizzApi_Base::setConfig(mwznb_build_sdk_config($apiUrl, $publicKey, $privateKey));
 
     $endpoint = new MailWizzApi_Endpoint_ListFields();
     $response = $endpoint->getFields($listUid);
     $response = $response->body->toArray();
+    
+    mwznb_restore_sdk_config($oldSdkConfig);
+    unset($oldSdkConfig);
     
     if (!isset($response['status']) || $response['status'] != 'success' || empty($response['data']['records']) || count($response['data']['records']) == 0) {
         die();
@@ -383,7 +402,6 @@ function mwznb_fetch_list_fields_callback() {
 add_action('wp_ajax_mwznb_subscribe', 'mwznb_subscribe_callback');
 add_action('wp_ajax_nopriv_mwznb_subscribe', 'mwznb_subscribe_callback');
 function mwznb_subscribe_callback() {
-
     $uid = isset($_POST['uid']) ? sanitize_text_field($_POST['uid']) : null;
     if ($uid) {
         unset($_POST['uid']);
@@ -407,11 +425,15 @@ function mwznb_subscribe_callback() {
         }
     }
     
-    mwznb_register_sdk($uidData['api_url'], $uidData['public_key'], $uidData['private_key']);
-    
+    $oldSdkConfig = MailWizzApi_Base::getConfig();
+    MailWizzApi_Base::setConfig(mwznb_build_sdk_config($uidData['api_url'], $uidData['public_key'], $uidData['private_key']));
+
     $endpoint = new MailWizzApi_Endpoint_ListSubscribers();
     $response = $endpoint->create($uidData['list_uid'], $_POST);
     $response = $response->body->toArray();
+    
+    mwznb_restore_sdk_config($oldSdkConfig);
+    unset($oldSdkConfig);
     
     if (isset($response['status']) && $response['status'] == 'error' && isset($response['error'])) {
         $errorMessage = $response['error'];
@@ -458,21 +480,9 @@ add_action('admin_notices', 'mwznb_admin_notice');
 
 
 // various function helpers
-// register the sdk only once (most of the cases)
-function mwznb_register_sdk($apiUrl, $publicKey, $privateKey) {
-    
-    static $_registered = array();
-    $key = sha1($apiUrl . $publicKey . $privateKey);
-    if (isset($_registered[$key])) {
-        return;
-    }
-
-    if (empty($_registered)) {
-        require_once dirname(__FILE__) . '/mailwizz-php-sdk/MailWizzApi/Autoloader.php';
-        MailWizzApi_Autoloader::register();
-    }
-    
-    $config = new MailWizzApi_Config(array(
+// build the sdk config
+function mwznb_build_sdk_config($apiUrl, $publicKey, $privateKey) {
+    return new MailWizzApi_Config(array(
         'apiUrl'        => $apiUrl,
         'publicKey'     => $publicKey,
         'privateKey'    => $privateKey,
@@ -485,8 +495,13 @@ function mwznb_register_sdk($apiUrl, $publicKey, $privateKey) {
             )
         ),
     ));
-    MailWizzApi_Base::setConfig($config);
-    $_registered[$key] = true;
+}
+
+// restore the original config
+function mwznb_restore_sdk_config($oldConfig) {
+    if (!empty($oldConfig)) {
+        MailWizzApi_Base::setConfig($oldConfig);
+    }
 }
 
 // small function to generate our fields table.
