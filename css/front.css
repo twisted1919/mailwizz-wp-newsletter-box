@@ -1,0 +1,79 @@
+.mwznb-widget {
+    font-size: 13px;
+    color: #000000;
+}
+.mwznb-widget label {
+    width: 100%; 
+    float:left;
+    color: #b94a48; 
+}
+
+.mwznb-widget label span.required {
+    color:#b94a48
+}
+
+.mwznb-widget .form-group {
+    float:left;
+    width:100%;
+    margin-bottom:10px;
+}
+
+.mwznb-widget input,
+.mwznb-widget textarea,
+.mwznb-widget select {
+    font-size: 13px;
+    color: #000000;
+    outline:none; 
+    resize:none;
+    width:100%;
+    float:left;
+    padding: 5px;
+    border: 1px solid #d4d0ba;
+    font-family: inherit;
+}
+
+.mwznb-widget input[type=submit], 
+.mwznb-widget button[type=submit] {
+    cursor:pointer;
+    border: 1px solid #d4d0ba;
+    padding: 5px;
+}
+
+.mwznb-widget .pull-right {
+    float:right;
+    margin-right:0px;
+}
+
+.mwznb-widget .pull-left {
+    float:left;
+    margin-left:0px;
+}
+
+.mwznb-widget .clearfix {
+    clear:both;
+}
+
+.mwznb-widget .error {
+    font-size:11px;
+    color:#b94a48;
+}
+.mwznb-widget .form-group.error {
+    font-size: 13px;
+    color: #b94a48;
+}
+.mwznb-widget .form-group.error input[type=text],
+.mwznb-widget .form-group.error select,
+.mwznb-widget .form-group.error textarea {
+    border: 1px solid #b94a48;
+    background: #f2dede;
+}
+
+.mwznb-widget input:focus,
+.mwznb-widget textarea:focus,
+.mwznb-widget select:focus {
+    border: 1px solid #d4d0ba;
+}
+
+.mwznb-widget .message {
+    color: #b94a48;
+}
