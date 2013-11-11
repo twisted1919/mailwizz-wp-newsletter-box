@@ -443,7 +443,7 @@ function mwznb_admin_notice() {
     if ($pagenow != 'widgets.php') {
         return;
     }
-    if (is_writable($cacheDir = dirname(__FILE__) . '/MailWizzApi/Cache/data/cache')) {
+    if (is_writable($cacheDir = dirname(__FILE__) . '/mailwizz-php-sdk/MailWizzApi/Cache/data/cache')) {
         return;
     }
     ?>
@@ -468,7 +468,7 @@ function mwznb_register_sdk($apiUrl, $publicKey, $privateKey) {
     }
 
     if (empty($_registered)) {
-        require_once dirname(__FILE__) . '/MailWizzApi/Autoloader.php';
+        require_once dirname(__FILE__) . '/mailwizz-php-sdk/MailWizzApi/Autoloader.php';
         MailWizzApi_Autoloader::register();
     }
     
@@ -481,7 +481,7 @@ function mwznb_register_sdk($apiUrl, $publicKey, $privateKey) {
         'components' => array(
             'cache' => array(
                 'class'     => 'MailWizzApi_Cache_File',
-                'filesPath' => dirname(__FILE__) . '/MailWizzApi/Cache/data/cache', // make sure it is writable by webserver
+                'filesPath' => dirname(__FILE__) . '/mailwizz-php-sdk/MailWizzApi/Cache/data/cache', // make sure it is writable by webserver
             )
         ),
     ));
