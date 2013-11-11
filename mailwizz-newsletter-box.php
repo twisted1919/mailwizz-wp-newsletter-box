@@ -18,49 +18,49 @@ License: MIT http://opensource.org/licenses/MIT
 class MailWizzNewsletterBox extends WP_Widget 
 {
     /**
-	 * Register widget with WordPress.
-	 */
+     * Register widget with WordPress.
+     */
     public function __construct()
     {
         parent::__construct(
-			'mwznb', // Base ID
-			__('MailWizz Newsletter Box', 'mwznb'), // Name
-			array( 'description' => __( 'MailWizz Newsletter Box', 'mwznb' ), ) // Args
-		);
+            'mwznb', // Base ID
+            __('MailWizz Newsletter Box', 'mwznb'), // Name
+            array( 'description' => __( 'MailWizz Newsletter Box', 'mwznb' ), ) // Args
+        );
     }
     
     /**
-	 * Front-end display of widget.
-	 *
-	 * @see WP_Widget::widget()
-	 *
-	 * @param array $args     Widget arguments.
-	 * @param array $instance Saved values from database.
-	 */
-	public function widget($args, $instance) {
-		$title = apply_filters('widget_title', $instance['title']);
+     * Front-end display of widget.
+     *
+     * @see WP_Widget::widget()
+     *
+     * @param array $args     Widget arguments.
+     * @param array $instance Saved values from database.
+     */
+    public function widget($args, $instance) {
+        $title = apply_filters('widget_title', $instance['title']);
 
-		echo $args['before_widget'];
-		if (!empty($title)) {
+        echo $args['before_widget'];
+        if (!empty($title)) {
             echo $args['before_title'] . $title . $args['after_title'];
-		}	
-		?>
+        }    
+        ?>
         <div class="mwznb-widget" data-ajaxurl="<?php echo admin_url('admin-ajax.php'); ?>">
             <div class="message"></div>
             <?php echo $instance['generated_form'];?>
         </div>
         <?php
-		echo $args['after_widget'];
-	}
+        echo $args['after_widget'];
+    }
     
     /**
-	 * Back-end widget form.
-	 *
-	 * @see WP_Widget::form()
-	 *
-	 * @param array $instance Previously saved values from database.
-	 */
-	public function form($instance) {
+     * Back-end widget form.
+     *
+     * @see WP_Widget::form()
+     *
+     * @param array $instance Previously saved values from database.
+     */
+    public function form($instance) {
 
         $title              = isset($instance['title'])                 ? $instance['title']                : null;
         $apiUrl             = isset($instance['api_url'])               ? $instance['api_url']              : null;
@@ -104,50 +104,50 @@ class MailWizzNewsletterBox extends WP_Widget
             }
         }
 
-		?>
-		<p>
-    		<label for="<?php echo $this->get_field_id('title'); ?>"><strong><?php _e('Title:'); ?></strong></label> 
-    		<input class="widefat" id="<?php echo $this->get_field_id('title'); ?>" name="<?php echo $this->get_field_name('title'); ?>" type="text" value="<?php echo esc_attr($title); ?>" />
-		</p>
+        ?>
+        <p>
+            <label for="<?php echo $this->get_field_id('title'); ?>"><strong><?php _e('Title:'); ?></strong></label> 
+            <input class="widefat" id="<?php echo $this->get_field_id('title'); ?>" name="<?php echo $this->get_field_name('title'); ?>" type="text" value="<?php echo esc_attr($title); ?>" />
+        </p>
         
         <p>
-    		<label for="<?php echo $this->get_field_id('api_url'); ?>"><strong><?php _e('Api url:'); ?></strong></label> 
-    		<input class="widefat mwz-api-url" id="<?php echo $this->get_field_id('api_url'); ?>" name="<?php echo $this->get_field_name('api_url'); ?>" type="text" value="<?php echo esc_attr($apiUrl); ?>" />
-		</p>
+            <label for="<?php echo $this->get_field_id('api_url'); ?>"><strong><?php _e('Api url:'); ?></strong></label> 
+            <input class="widefat mwz-api-url" id="<?php echo $this->get_field_id('api_url'); ?>" name="<?php echo $this->get_field_name('api_url'); ?>" type="text" value="<?php echo esc_attr($apiUrl); ?>" />
+        </p>
         
         <p>
-    		<label for="<?php echo $this->get_field_id('public_key'); ?>"><strong><?php _e('Public api key:'); ?></strong></label> 
-    		<input class="widefat mwz-public-key" id="<?php echo $this->get_field_id('public_key'); ?>" name="<?php echo $this->get_field_name('public_key'); ?>" type="text" value="<?php echo esc_attr($publicKey); ?>" />
-		</p>
+            <label for="<?php echo $this->get_field_id('public_key'); ?>"><strong><?php _e('Public api key:'); ?></strong></label> 
+            <input class="widefat mwz-public-key" id="<?php echo $this->get_field_id('public_key'); ?>" name="<?php echo $this->get_field_name('public_key'); ?>" type="text" value="<?php echo esc_attr($publicKey); ?>" />
+        </p>
         
         <p>
-    		<label for="<?php echo $this->get_field_id('private_key'); ?>"><strong><?php _e('Private api key:'); ?></strong></label> 
-    		<input class="widefat mwz-private-key" id="<?php echo $this->get_field_id('private_key'); ?>" name="<?php echo $this->get_field_name('private_key'); ?>" type="text" value="<?php echo esc_attr($privateKey); ?>" />
-		</p>
+            <label for="<?php echo $this->get_field_id('private_key'); ?>"><strong><?php _e('Private api key:'); ?></strong></label> 
+            <input class="widefat mwz-private-key" id="<?php echo $this->get_field_id('private_key'); ?>" name="<?php echo $this->get_field_name('private_key'); ?>" type="text" value="<?php echo esc_attr($privateKey); ?>" />
+        </p>
         
         <div class="widget-control-actions">
-    		<div class="alignleft"></div>
-    		<div class="alignright">
-   			  <input type="submit" class="button button-primary right mwz-fetch-available-lists" value="Fetch available lists">			
-	           <span class="spinner mwz-spinner" style="display: none;"></span>
+            <div class="alignleft"></div>
+            <div class="alignright">
+                 <input type="submit" class="button button-primary right mwz-fetch-available-lists" value="Fetch available lists">            
+               <span class="spinner mwz-spinner" style="display: none;"></span>
             </div>
-    		<br class="clear">
-    	</div>
+            <br class="clear">
+        </div>
         
         <div class="lists-container" style="<?php echo !empty($freshFields) ? 'display:block':'display:none';?>; margin:0; float:left; width:100%">
-    		<label for="<?php echo $this->get_field_id('list_uid'); ?>"><strong><?php _e('Select a list:'); ?></strong></label> 
-    		<select data-listuid="<?php echo esc_attr($listUid); ?>" data-fieldname="<?php echo $this->get_field_name('selected_fields');?>" class="widefat mwz-mail-lists-dropdown" id="<?php echo $this->get_field_id('list_uid'); ?>" name="<?php echo $this->get_field_name('list_uid'); ?>">
+            <label for="<?php echo $this->get_field_id('list_uid'); ?>"><strong><?php _e('Select a list:'); ?></strong></label> 
+            <select data-listuid="<?php echo esc_attr($listUid); ?>" data-fieldname="<?php echo $this->get_field_name('selected_fields');?>" class="widefat mwz-mail-lists-dropdown" id="<?php echo $this->get_field_id('list_uid'); ?>" name="<?php echo $this->get_field_name('list_uid'); ?>">
             <?php foreach ($freshLists as $list) { ?>
             <option value="<?php echo $list['list_uid'];?>"<?php if ($listUid == $list['list_uid']) { echo ' selected="selected"';}?>><?php echo $list['name'];?></option>
             <?php } ?>
             </select>
             <br class="clear"/>
             <br class="clear"/>
-		</div>
+        </div>
         
         <div class="fields-container" style="<?php echo !empty($listUid) ? 'display:block':'display:none';?>; margin:0; float:left; width:100%">
-    		<label for="<?php echo $this->get_field_id('selected_fields'); ?>"><strong><?php _e('Fields:'); ?></strong></label> 
-    		<div class="table-container" style="width:100%;max-height:200px; overflow-y: scroll">
+            <label for="<?php echo $this->get_field_id('selected_fields'); ?>"><strong><?php _e('Fields:'); ?></strong></label> 
+            <div class="table-container" style="width:100%;max-height:200px; overflow-y: scroll">
                 <?php mwznb_generate_fields_table($freshFields, $this->get_field_name('selected_fields'), $listSelectedFields);?>
             </div>
             <br class="clear">
@@ -155,30 +155,30 @@ class MailWizzNewsletterBox extends WP_Widget
                 Generate form again: <input name="<?php echo $this->get_field_name('generate_new_form'); ?>" value="1" type="checkbox" checked="checked"/>
             </div>
             <br class="clear">
-		</div>
+        </div>
         
         <div class="generated-form-container" style="<?php echo !empty($listUid) ? 'display:block':'display:none';?>; margin:0; float:left; width:100%">
-    		<label for="<?php echo $this->get_field_id('generated_form'); ?>"><strong><?php _e('Generated form:'); ?></strong></label> 
-    		<textarea name="<?php echo $this->get_field_name('generated_form'); ?>" id="<?php echo $this->get_field_id('generated_form'); ?>" style="width: 100%; height: 200px; resize:none; outline:none"><?php echo $generatedForm;?></textarea>
-		</div>
+            <label for="<?php echo $this->get_field_id('generated_form'); ?>"><strong><?php _e('Generated form:'); ?></strong></label> 
+            <textarea name="<?php echo $this->get_field_name('generated_form'); ?>" id="<?php echo $this->get_field_id('generated_form'); ?>" style="width: 100%; height: 200px; resize:none; outline:none"><?php echo $generatedForm;?></textarea>
+        </div>
         
         <hr />
-		<?php 
-	}
+        <?php 
+    }
     
     /**
-	 * Sanitize widget form values as they are saved.
-	 *
-	 * @see WP_Widget::update()
-	 *
-	 * @param array $new_instance Values just sent to be saved.
-	 * @param array $old_instance Previously saved values from database.
-	 *
-	 * @return array Updated safe values to be saved.
-	 */
-	public function update($new_instance, $old_instance) {
-		$instance = array();
-		
+     * Sanitize widget form values as they are saved.
+     *
+     * @see WP_Widget::update()
+     *
+     * @param array $new_instance Values just sent to be saved.
+     * @param array $old_instance Previously saved values from database.
+     *
+     * @return array Updated safe values to be saved.
+     */
+    public function update($new_instance, $old_instance) {
+        $instance = array();
+        
         $instance['title']          = !empty($new_instance['title'])        ? sanitize_text_field($new_instance['title'])       : '';
         $instance['api_url']        = !empty($new_instance['api_url'])      ? sanitize_text_field($new_instance['api_url'])     : '';
         $instance['public_key']     = !empty($new_instance['public_key'])   ? sanitize_text_field($new_instance['public_key'])  : '';
@@ -201,8 +201,8 @@ class MailWizzNewsletterBox extends WP_Widget
             $instance['generated_form'] = !empty($new_instance['generated_form']) ? $new_instance['generated_form'] : '';
         }
         
-		return $instance;
-	}
+        return $instance;
+    }
     
     /**
      * Helper method to generate the html form that will be pushed in the widgets area in frontend.
