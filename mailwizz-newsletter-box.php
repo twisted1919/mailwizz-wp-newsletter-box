@@ -3,7 +3,7 @@
 Plugin Name: MailWizz Newsletter Box
 Plugin URI: http://www.mailwizz.com
 Description: Adds a subscription widget for your <a href="http://www.mailwizz.com/" target="_blank">MailWizz Email Marketing Application</a> based on the <a href="https://github.com/twisted1919/mailwizz-php-sdk" target="_blank">PHP-SDK</a>. <br />Using the widget, you can generate a subscription form based on your mail list definition. You also have full control over the generated form, so you can continue changing it until it fits your needs.
-Version: 1.0
+Version: 1.1
 Author: Serban Cristian <cristian.serban@mailwizz.com>
 Author URI: http://www.mailwizz.com
 License: MIT http://opensource.org/licenses/MIT
@@ -51,10 +51,15 @@ class MailWizzNewsletterBox extends WP_Widget
         if (!empty($title)) {
             echo $args['before_title'] . $title . $args['after_title'];
         }    
+		
+		$nonce      = wp_create_nonce(basename(__FILE__));
+		$nonceField = '<input type="hidden" name="mwznb_form_nonce" value="'.$nonce.'" />';
+		$form       = $instance['generated_form'];
+		$form       = str_replace('</form>', "\n" . $nonceField . "\n</form>", $form);
         ?>
         <div class="mwznb-widget" data-ajaxurl="<?php echo admin_url('admin-ajax.php'); ?>">
             <div class="message"></div>
-            <?php echo $instance['generated_form'];?>
+            <?php echo $form;?>
         </div>
         <?php
         echo $args['after_widget'];
@@ -309,7 +314,7 @@ function mwznb_fetch_lists_callback() {
         $errors['private_key'] = __('Please type a private API key!', 'mwznb');
     }
     if (!empty($errors)) {
-        exit(json_encode(array(
+        exit(MailWizzApi_Json::encode(array(
             'result' => 'error',
             'errors' => $errors,
         )));
@@ -326,7 +331,7 @@ function mwznb_fetch_lists_callback() {
     unset($oldSdkConfig);
     
     if (!isset($response['status']) || $response['status'] != 'success') {
-        exit(json_encode(array(
+        exit(MailWizzApi_Json::encode(array(
             'result' => 'error',
             'errors' => array(
                 'general'   => isset($response['error']) ? $response['error'] : __('Invalid request!', 'mwznb'),
@@ -335,7 +340,7 @@ function mwznb_fetch_lists_callback() {
     }
     
     if (empty($response['data']['records']) || count($response['data']['records']) == 0) {
-        exit(json_encode(array(
+        exit(MailWizzApi_Json::encode(array(
             'result' => 'error',
             'errors' => array(
                 'general'   => __('We couldn\'t find any mail list, are you sure you have created one?', 'mwznb'),
@@ -357,7 +362,7 @@ function mwznb_fetch_lists_callback() {
         );
     }
     
-    exit(json_encode(array(
+    exit(MailWizzApi_Json::encode(array(
         'result' => 'success',
         'lists' => $lists,
     )));
@@ -403,14 +408,21 @@ function mwznb_fetch_list_fields_callback() {
 add_action('wp_ajax_mwznb_subscribe', 'mwznb_subscribe_callback');
 add_action('wp_ajax_nopriv_mwznb_subscribe', 'mwznb_subscribe_callback');
 function mwznb_subscribe_callback() {
+	if (!isset($_POST['mwznb_form_nonce']) || !wp_verify_nonce($_POST['mwznb_form_nonce'], basename(__FILE__))) {
+		exit(MailWizzApi_Json::encode(array(
+            'result'    => 'error', 
+            'message'   => __('Invalid nonce!', 'mwznb')
+        )));
+	}
+
     $uid = isset($_POST['uid']) ? sanitize_text_field($_POST['uid']) : null;
     if ($uid) {
         unset($_POST['uid']);
     }
-    unset($_POST['action']);
+    unset($_POST['action'], $_POST['mwznb_form_nonce']);
     
     if (empty($uid) || !($uidData = get_option('mwznb_widget_instance_' . $uid))) {
-        exit(json_encode(array(
+        exit(MailWizzApi_Json::encode(array(
             'result'    => 'error', 
             'message'   => __('Please try again later!', 'mwznb')
         )));
@@ -419,7 +431,7 @@ function mwznb_subscribe_callback() {
     $keys = array('api_url', 'public_key', 'private_key', 'list_uid');
     foreach ($keys as $key) {
         if (!isset($uidData[$key])) {
-            exit(json_encode(array(
+            exit(MailWizzApi_Json::encode(array(
                 'result'    => 'error', 
                 'message'   => __('Please try again later!', 'mwznb')
             )));
@@ -441,20 +453,20 @@ function mwznb_subscribe_callback() {
         if (is_array($errorMessage)) {
             $errorMessage = implode("\n", array_values($errorMessage));
         }
-        exit(json_encode(array(
+        exit(MailWizzApi_Json::encode(array(
             'result'    => 'error', 
             'message'   => $errorMessage
         )));
     }
     
     if (isset($response['status']) && $response['status'] == 'success') {
-        exit(json_encode(array(
+        exit(MailWizzApi_Json::encode(array(
             'result'    => 'success', 
             'message'   => __('Please check your email to confirm the subscription!', 'mwznb')
         )));
     }
     
-    exit(json_encode(array(
+    exit(MailWizzApi_Json::encode(array(
         'result'    => 'success', 
         'message'   => __('Unknown error!', 'mwznb')
     )));
